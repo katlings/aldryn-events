@@ -2,10 +2,10 @@
 from __future__ import unicode_literals
 
 from django.core.exceptions import ValidationError
-from django.core.urlresolvers import reverse
 from django.db import models
+from django.urls import reverse
 from django.utils import timezone
-from django.utils.encoding import force_text, python_2_unicode_compatible
+from django.utils.encoding import force_text
 from django.utils.translation import override, ugettext_lazy as _, ugettext
 
 from cms.models import CMSPlugin
@@ -29,7 +29,6 @@ from .utils import get_additional_styles, date_or_datetime
 STANDARD = 'standard'
 
 
-@python_2_unicode_compatible
 class Event(TranslatedAutoSlugifyMixin,
             TranslationHelperMixin,
             TranslatableModel):
@@ -95,7 +94,7 @@ class Event(TranslatedAutoSlugifyMixin,
         ),
         meta={'unique_together': (('language_code', 'slug'),)}
     )
-    app_config = models.ForeignKey(EventsConfig, verbose_name=_('app_config'))
+    app_config = models.ForeignKey(EventsConfig, verbose_name=_('app_config'), on_delete=models.CASCADE)
 
     objects = EventManager()
 
@@ -229,7 +228,6 @@ class Event(TranslatedAutoSlugifyMixin,
             return reverse('{0}events_detail'.format(namespace), kwargs=kwargs)
 
 
-@python_2_unicode_compatible
 class EventCoordinator(models.Model):
 
     name = models.CharField(max_length=200, blank=True)
@@ -239,6 +237,7 @@ class EventCoordinator(models.Model):
         verbose_name=_('user'),
         null=True,
         blank=True,
+        on_delete=models.CASCADE,
     )
 
     def __str__(self):
@@ -284,7 +283,7 @@ class Registration(models.Model):
         max_length=32
     )
 
-    event = models.ForeignKey(Event)
+    event = models.ForeignKey(Event, on_delete=models.CASCADE)
     salutation = models.CharField(
         _('Salutation'), max_length=5, choices=SALUTATIONS,
         default=SALUTATIONS.SALUTATION_FEMALE
@@ -315,7 +314,7 @@ class Registration(models.Model):
 
 
 class BaseEventPlugin(CMSPlugin):
-    app_config = models.ForeignKey(EventsConfig, verbose_name=_('app_config'))
+    app_config = models.ForeignKey(EventsConfig, verbose_name=_('app_config'), on_delete=models.CASCADE)
 
     # Add an app namespace to related_name to avoid field name clashes
     # with any other plugins that have a field with the same name as the
@@ -325,6 +324,7 @@ class BaseEventPlugin(CMSPlugin):
         CMSPlugin,
         related_name='%(app_label)s_%(class)s',
         parent_link=True,
+        on_delete=models.CASCADE,
     )
 
     def copy_relations(self, old_instance):
@@ -334,7 +334,6 @@ class BaseEventPlugin(CMSPlugin):
         abstract = True
 
 
-@python_2_unicode_compatible
 class EventListPlugin(BaseEventPlugin):
     STYLE_CHOICES = [
         (STANDARD, _('Standard')),
@@ -360,7 +359,6 @@ class EventListPlugin(BaseEventPlugin):
         self.events = Event.objects.filter(eventlistplugin__pk=oldinstance.pk)
 
 
-@python_2_unicode_compatible
 class UpcomingPluginItem(BaseEventPlugin):
     STYLE_CHOICES = [
         (STANDARD, _('Standard')),
@@ -404,7 +402,6 @@ class UpcomingPluginItem(BaseEventPlugin):
         )
 
 
-@python_2_unicode_compatible
 class EventCalendarPlugin(BaseEventPlugin):
 
     cache_duration = models.PositiveSmallIntegerField(

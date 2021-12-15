@@ -3,8 +3,8 @@
 from datetime import timedelta, date
 
 from django import template
-from django.core.urlresolvers import reverse, NoReverseMatch
 from django.template.loader import get_template
+from django.urls import reverse, NoReverseMatch
 from django.utils.dates import MONTHS
 from django.utils import timezone
 from django.utils.translation import (

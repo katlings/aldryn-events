@@ -5,8 +5,8 @@ from itertools import chain
 from django import forms
 from django.conf import settings
 from django.contrib.sites.shortcuts import get_current_site
-from django.core.urlresolvers import reverse
 from django.http import Http404
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.cache import add_never_cache_headers
 from django.utils.translation import get_language_from_request
